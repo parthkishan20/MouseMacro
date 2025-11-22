@@ -400,29 +400,296 @@ rm -rf ~/Library/Developer/Xcode/DerivedData/MouseMacro-*
 
 ---
 
-## Customization
+## Customization Guide
 
-### Change Button Mappings
+### Change Button Shortcuts
 
-Edit `MouseMacro/MouseMacroHandler.swift`:
+Want Button 4 to trigger **⌘+P** instead of **⌘+C**? Or **⌘+Shift+4** for screenshots? Here's how:
 
-```swift
-// Find this section:
-case 3: // Button 4 on the mouse
-    sendShortcut(key: .c, modifier: .maskCommand)  // Change .c to any VirtualKey
+#### Step 1: Open the Handler File
 
-case 4: // Button 5 on the mouse
-    sendShortcut(key: .v, modifier: .maskCommand)  // Change .v to any VirtualKey
+```bash
+# Open in your text editor or Xcode
+open MouseMacro/MouseMacroHandler.swift
 ```
 
-Available keys in the `VirtualKey` enum: a-z, 0-9, return, tab, space, delete, escape, etc.
+#### Step 2: Modify the Button Actions
+
+Find the `handleMouseEvent` function around **line 21-37**:
+
+```swift
+switch buttonNumber {
+case 3: // Button 4 on the mouse
+    logger.info("Button 4 pressed - triggering ⌘+C")
+    sendShortcut(key: .c, modifier: .maskCommand)
+    Task { @MainActor in
+        PreferencesState.shared.recordCopy()
+    }
+    return nil
+    
+case 4: // Button 5 on the mouse
+    logger.info("Button 5 pressed - triggering ⌘+V")
+    sendShortcut(key: .v, modifier: .maskCommand)
+    Task { @MainActor in
+        PreferencesState.shared.recordPaste()
+    }
+    return nil
+```
+
+### Common Customization Examples
+
+#### Example 1: Change Button 4 to ⌘+P (Print)
+
+Replace:
+```swift
+case 3: // Button 4 on the mouse
+    logger.info("Button 4 pressed - triggering ⌘+C")
+    sendShortcut(key: .c, modifier: .maskCommand)
+```
+
+With:
+```swift
+case 3: // Button 4 on the mouse
+    logger.info("Button 4 pressed - triggering ⌘+P")
+    sendShortcut(key: .p, modifier: .maskCommand)
+```
+
+#### Example 2: Change Button 5 to ⌘+Shift+4 (Screenshot)
+
+Replace:
+```swift
+case 4: // Button 5 on the mouse
+    logger.info("Button 5 pressed - triggering ⌘+V")
+    sendShortcut(key: .v, modifier: .maskCommand)
+```
+
+With:
+```swift
+case 4: // Button 5 on the mouse
+    logger.info("Button 5 pressed - triggering ⌘+Shift+4")
+    sendShortcut(key: .four, modifier: [.maskCommand, .maskShift])
+```
+
+#### Example 3: ⌘+Option+Esc (Force Quit)
+
+```swift
+case 3: // Button 4
+    logger.info("Button 4 pressed - triggering ⌘+Option+Esc")
+    sendShortcut(key: .escape, modifier: [.maskCommand, .maskAlternate])
+```
+
+#### Example 4: ⌘+Z (Undo)
+
+```swift
+case 3: // Button 4
+    logger.info("Button 4 pressed - triggering ⌘+Z")
+    sendShortcut(key: .z, modifier: .maskCommand)
+```
+
+#### Example 5: ⌘+Tab (Switch Apps)
+
+```swift
+case 3: // Button 4
+    logger.info("Button 4 pressed - triggering ⌘+Tab")
+    sendShortcut(key: .tab, modifier: .maskCommand)
+```
+
+### Available Modifier Keys
+
+You can combine multiple modifiers:
+
+```swift
+.maskCommand        // ⌘ Command key
+.maskShift          // ⇧ Shift key
+.maskAlternate      // ⌥ Option/Alt key
+.maskControl        // ⌃ Control key
+
+// Combine multiple modifiers with array:
+[.maskCommand, .maskShift]              // ⌘ + Shift
+[.maskCommand, .maskAlternate]          // ⌘ + Option
+[.maskCommand, .maskShift, .maskAlternate]  // ⌘ + Shift + Option
+```
+
+### Available Keys
+
+All keys are defined in the `VirtualKey` enum (lines 82-176 in MouseMacroHandler.swift):
+
+**Letters:**
+```swift
+.a, .b, .c, .d, .e, .f, .g, .h, .i, .j, .k, .l, .m, 
+.n, .o, .p, .q, .r, .s, .t, .u, .v, .w, .x, .y, .z
+```
+
+**Numbers:**
+```swift
+.zero, .one, .two, .three, .four, .five, .six, .seven, .eight, .nine
+```
+
+**Special Keys:**
+```swift
+.return       // Enter
+.tab          // Tab
+.space        // Space
+.delete       // Backspace
+.escape       // Esc
+.command      // ⌘
+.shift        // ⇧
+.option       // ⌥
+.control      // ⌃
+```
+
+**Punctuation:**
+```swift
+.comma        // ,
+.period       // .
+.slash        // /
+.semicolon    // ;
+.quote        // '
+.leftBracket  // [
+.rightBracket // ]
+.backslash    // \
+.grave        // `
+.minus        // -
+.equal        // =
+```
+
+**Keypad:**
+```swift
+.keypad0, .keypad1, .keypad2, ..., .keypad9
+.keypadPlus, .keypadMinus, .keypadMultiply, .keypadDivide
+```
+
+### Step 3: Update PreferencesView (Optional)
+
+If you want the Preferences window to show your new shortcuts, edit `MouseMacro/PreferencesView.swift` around **line 53-73**:
+
+Find:
+```swift
+HStack {
+    Text("Button 4")
+        .fontWeight(.medium)
+        .frame(width: 80, alignment: .leading)
+    Text("→")
+        .foregroundColor(.secondary)
+    Text("⌘ + C")
+        .fontWeight(.semibold)
+        .foregroundColor(.blue)
+    Text("(Copy)")
+        .foregroundColor(.secondary)
+        .font(.caption)
+}
+```
+
+Change to match your new shortcut, for example for ⌘+P:
+```swift
+HStack {
+    Text("Button 4")
+        .fontWeight(.medium)
+        .frame(width: 80, alignment: .leading)
+    Text("→")
+        .foregroundColor(.secondary)
+    Text("⌘ + P")
+        .fontWeight(.semibold)
+        .foregroundColor(.blue)
+    Text("(Print)")
+        .foregroundColor(.secondary)
+        .font(.caption)
+}
+```
+
+Also update the `recordCopy()` and `recordPaste()` methods in PreferencesView.swift (lines 18-26) to reflect your new actions:
+
+```swift
+func recordPrint() {  // Rename from recordCopy
+    copyCount += 1
+    lastAction = "Button 4 → ⌘ + P (Total: \(copyCount))"
+}
+```
+
+And update the calls in MouseMacroHandler.swift:
+```swift
+Task { @MainActor in
+    PreferencesState.shared.recordPrint()  // Change from recordCopy
+}
+```
+
+### Step 4: Rebuild and Test
+
+```bash
+# Navigate to project
+cd ~/Desktop/MouseMacro
+
+# Stop running app
+pkill -f MouseMacro
+
+# Rebuild
+xcodebuild -scheme MouseMacro -configuration Debug build
+
+# Run
+open ~/Library/Developer/Xcode/DerivedData/MouseMacro-*/Build/Products/Debug/MouseMacro.app
+```
+
+Test your new shortcuts!
+
+### Advanced: Add More Mouse Buttons
+
+Want to use Button 6, 7, or 8?
+
+Add more cases in the switch statement:
+
+```swift
+switch buttonNumber {
+case 3: // Button 4
+    sendShortcut(key: .c, modifier: .maskCommand)
+    return nil
+    
+case 4: // Button 5
+    sendShortcut(key: .v, modifier: .maskCommand)
+    return nil
+    
+case 5: // Button 6 - NEW!
+    sendShortcut(key: .x, modifier: .maskCommand)  // ⌘+X (Cut)
+    return nil
+    
+case 6: // Button 7 - NEW!
+    sendShortcut(key: .a, modifier: .maskCommand)  // ⌘+A (Select All)
+    return nil
+    
+default:
+    return Unmanaged.passUnretained(event)
+}
+```
+
+### Quick Reference Table
+
+| Shortcut | Key | Modifier | Example |
+|----------|-----|----------|---------|
+| ⌘+C | `.c` | `.maskCommand` | Copy |
+| ⌘+V | `.v` | `.maskCommand` | Paste |
+| ⌘+X | `.x` | `.maskCommand` | Cut |
+| ⌘+Z | `.z` | `.maskCommand` | Undo |
+| ⌘+Shift+Z | `.z` | `[.maskCommand, .maskShift]` | Redo |
+| ⌘+S | `.s` | `.maskCommand` | Save |
+| ⌘+P | `.p` | `.maskCommand` | Print |
+| ⌘+F | `.f` | `.maskCommand` | Find |
+| ⌘+Tab | `.tab` | `.maskCommand` | Switch Apps |
+| ⌘+Space | `.space` | `.maskCommand` | Spotlight |
+| ⌘+Shift+3 | `.three` | `[.maskCommand, .maskShift]` | Screenshot |
+| ⌘+Shift+4 | `.four` | `[.maskCommand, .maskShift]` | Area Screenshot |
+| ⌘+Option+Esc | `.escape` | `[.maskCommand, .maskAlternate]` | Force Quit |
+| ⌘+Q | `.q` | `.maskCommand` | Quit App |
+| ⌘+W | `.w` | `.maskCommand` | Close Window |
+| ⌘+T | `.t` | `.maskCommand` | New Tab |
+| ⌘+N | `.n` | `.maskCommand` | New Window |
+
+---
 
 ### Change Menu Bar Icon
 
 Edit `MouseMacro/AppDelegate.swift`:
 
 ```swift
-// Find this line:
+// Find this line around line 67:
 button.image = NSImage(systemSymbolName: "bolt.circle", accessibilityDescription: "MouseMacro")
 
 // Change "bolt.circle" to any SF Symbol name:
