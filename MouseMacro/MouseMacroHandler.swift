@@ -52,9 +52,6 @@ private func sendShortcut(key: VirtualKey, modifier: CGEventFlags) {
         return
     }
     
-    // Suppress event source seconds to prevent feedback loops
-    source.setLocalEventsSuppressionInterval(0.25)
-    
     // Create key down event
     guard let keyDown = CGEvent(keyboardEventSource: source, virtualKey: key.rawValue, keyDown: true) else {
         logger.error("Failed to create key down event for \(key.description)")
