@@ -1,17 +1,13 @@
-//
-//  MouseMacroApp.swift
-//  MouseMacro
-//
-//  Created by SkyBolt on 8/4/25.
-//
-
 import SwiftUI
+import Cocoa
 
 @main
-struct MouseMacroApp: App {
+struct MouseMacroAppSwiftUI: App {
+    @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+
     var body: some Scene {
-        WindowGroup {
-            ContentView()
+        Settings {
+            EmptyView()
         }
     }
 }

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleIdentifier</key>
+    <string>com.skybolt.MouseMacro</string>
+
+    <key>NSAppleEventsUsageDescription</key>
+    <string>We need to send Command+C and Command+V keystrokes for macro actions.</string>
+
+    <key>NSAccessibilityUsageDescription</key>
+    <string>This app needs access to monitor mouse buttons globally for macro triggers.</string>
+</dict>
+</plist>
